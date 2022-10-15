@@ -1,8 +1,6 @@
 <!-- Please remove this file from your project -->
 <template>
-  <div
-    class="relative flex items-top justify-center min-h-screen bg-gray-100 sm:items-center sm:pt-0"
-  >
+  <div class="relative flex items-top justify-center min-h-screen bg-gray-100 sm:items-center sm:pt-0">
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
       rel="stylesheet"
@@ -21,15 +19,16 @@
 
       </b-row>
       <b-row>
-        <b-col cols="3" class="bg-success">
-          <div
-            :style="{
+        <b-col
+          cols="3"
+          class="bg-success"
+        >
+          <div :style="{
               display: 'flex',
               'justify-content': 'center',
               'align-items': 'center',
               'flex-direction': 'column',
-            }"
-          >
+            }">
             <img
               src="https://via.placeholder.com/100"
               alt="paragraph"
@@ -38,14 +37,12 @@
             />
             <p>paragraph</p>
           </div>
-          <div
-            :style="{
+          <div :style="{
               display: 'flex',
               'justify-content': 'center',
               'align-items': 'center',
               'flex-direction': 'column',
-            }"
-          >
+            }">
             <img
               src="https://via.placeholder.com/100"
               alt="button"
@@ -54,14 +51,12 @@
             />
             <p>button</p>
           </div>
-          <div
-            :style="{
+          <div :style="{
               display: 'flex',
               'justify-content': 'center',
               'align-items': 'center',
               'flex-direction': 'column',
-            }"
-          >
+            }">
             <img
               src="https://via.placeholder.com/100"
               alt="imageUpload"
@@ -70,14 +65,12 @@
             />
             <p>imageUpload</p>
           </div>
-          <div
-            :style="{
+          <div :style="{
               display: 'flex',
               'justify-content': 'center',
               'align-items': 'center',
               'flex-direction': 'column',
-            }"
-          >
+            }">
             <img
               src="https://via.placeholder.com/100"
               alt="textEditor"
@@ -87,43 +80,56 @@
             <p>textEditor</p>
           </div>
         </b-col>
-        <b-col cols="9" class="bg-info" @drop="drop" @dragover="allowDrop" :style="{'position': 'relative'}">
+        <b-col
+          cols="9"
+          class="bg-info"
+          @drop="drop"
+          @dragover="allowDrop"
+          :style="{'position': 'relative'}"
+        >
           {{ JSON.stringify(info) }}
           <ul>
-            <li v-for="({ type }, index) in info" :key="index">
+            <li
+              v-for="(item, index) in info"
+              :key="index"
+            >
               <button
-                v-if="type === 'button'"
+                v-if="item.type === 'button'"
                 :style="{
                   border: '1px solid black',
                   'background-color': 'gray',
                   padding: '10px',
                 }"
+                @click="changeText(item)"
               >
-                button
+                {{item.text}}
               </button>
               <p
-                v-if="type === 'paragraph'"
+                v-if="item.type === 'paragraph'"
                 :style="{ 'font-size': '20px', 'font-weight': 'bold' }"
+                @click="changeText(item)"
               >
-                paragraph
+                {{item.text}}
               </p>
               <p
-                v-if="type === 'imageUpload'"
+                v-if="item.type === 'imageUpload'"
                 :style="{
                   'font-size': '20px',
                   'font-style': 'italic',
                   color: 'darkred',
                 }"
+                @click="changeText(item)"
               >
                 imageUpload
               </p>
               <p
-                v-if="type === 'textEditor'"
+                v-if="item.type === 'textEditor'"
                 :style="{
                   'font-size': '20px',
                   'font-style': 'italic',
                   color: 'blue',
                 }"
+                @click="changeText(item)"
               >
                 textEditor
               </p>
@@ -131,6 +137,30 @@
           </ul>
           <div :style="{'position': 'absolute', 'bottom': 0, 'display': 'block' ,'min-height': '100px', 'width': '97%','border-top': '1px solid black'}">
             detail
+            <form v-if="selectedItem">
+              <div v-if="selectedItem.type === 'paragraph'">
+                <label for="text">paragraph text</label>
+                <input
+                  type="text"
+                  :value="selectedItem.text"
+                  @keyup="updateContent"
+                />
+              </div>
+              <div v-if="selectedItem.type === 'button'">
+                <label for="text">button text</label>
+                <input
+                  type="text"
+                  :value="selectedItem.text"
+                  @keyup="updateContent"
+                >
+                <label for="text">alert message</label>
+                <input
+                  type="text"
+                  :value="selectedItem.alertMessage"
+                  @keyup="updateAlertMessage"
+                >
+              </div>
+            </form>
           </div>
         </b-col>
       </b-row>
@@ -141,28 +171,43 @@
 <script>
 export default {
   name: 'SomethingComponent',
-  data() {
+  data () {
     return {
       info: [],
+      id: 0,
+      selectedItem: null
     }
   },
   methods: {
-    drag(event) {
+    drag (event) {
       console.log('DRAG', event)
       const controlType = event.srcElement.alt
       event.dataTransfer.setData('type', controlType)
     },
-    drop(event) {
+    drop (event) {
       const type = event.dataTransfer.getData('type')
       console.log('DROP', type)
       event.preventDefault()
       /* const textnode = document.createTextNode('Water') */
       /* event.target.appendChild(textnode) */
-      this.info.push({ type })
+      const item = { type, id: ++this.id, text: type };
+      this.info.push(item)
     },
-    allowDrop(event) {
+    allowDrop (event) {
       /* console.log('DROP', event) */
       event.preventDefault()
+    },
+    changeText (item) {
+      console.log('change text')
+      this.selectedItem = item
+    },
+    updateContent (event) {
+      this.selectedItem.text = event.target.value;
+      this.info[this.info.findIndex(item => item.id === this.selectedItem.id)].text = event.target.value;
+    },
+    updateAlertMessage(event) {
+      this.selectedItem.alertMessage = event.target.value;
+      this.info[this.info.findIndex(item => item.id === this.selectedItem.id)].alertMessage = event.target.value;
     },
   },
 }
